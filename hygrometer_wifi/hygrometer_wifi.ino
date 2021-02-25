@@ -6,14 +6,14 @@
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
 #include <ArduinoJson.h>
-#include <Base64.h>
-
+// #include <Base64.h>
 // #include <ESP8266WebServer.h>
 // #include <Ticker.h>
 // #include "SPI.h"   //TODO remove
 // #include <SPISlave.h.h>  // TODO: remove?  
 #include <pins_arduino.h>
 #include "Gsender.h"
+#include "base64.h"
 
 
 /**
@@ -164,16 +164,17 @@ void setup(void) {
    * Setup pin directions
    */
   pinMode(SLEEP_BIT, INPUT);
-  
-  
-  /**
-   * Define the LED driver pins
-   * as outputs.
-   * TODO: cleanup stale code
-   */
-  // pinMode(LED_1, OUTPUT);
-  // pinMode(LED_2, OUTPUT);
 
+  /** 
+   * TODO: The following is test code
+   * and needs to be removed
+  */
+  // char * my_test_string = "whatsup";
+  // int temp_length = strlen(my_test_string);
+  // int b64len = b64_encode(buf_hyg_email_address_b64, my_test_string, strlen(my_test_string));
+  // delay(100);
+  
+  
   Serial.begin(115200);
   Serial.setTimeout(50);    //Timeout value in ms -- max is 1000
   

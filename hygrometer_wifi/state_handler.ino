@@ -68,58 +68,73 @@ void StateEvaluation( void ) {      //TODO: see babybot for example
 
         break;
         
-        // case PARSE_INPUT_DATA:
-        //     int temp_length = 0;
+        case PARSE_INPUT_DATA:
+        {
+            // #include <Base64.h>// TODO remove
 
-        //     json_err = deserializeJson(json_doc,data_input_string);
-        //     if(json_err) {
-        //         Serial.print("Error: "); Serial.println(json_err.c_str());
-        //         return;
-        //     }
+            int temp_length = 0;
+            int b64len = 0;
 
-        //     const char * cc_hyg_email_addr = json_doc["hyg_email_acc"];
-        //     memcpy(buf_hyg_email_address, cc_hyg_email_addr, strlen(cc_hyg_email_addr));
+            json_err = deserializeJson(json_doc,data_input_string);
+            if(json_err) {
+                Serial.print("Error: "); Serial.println(json_err.c_str());
+                return;
+            }
 
-        //     const char * cc_hyg_email_pass = json_doc["hyg_email_pass"];
-        //     memcpy(buf_hyg_email_password, cc_hyg_email_pass, strlen(cc_hyg_email_pass));
+            const char * cc_hyg_email_addr = json_doc["hyg_email_acc"];
+            memcpy(buf_hyg_email_address, cc_hyg_email_addr, strlen(cc_hyg_email_addr));
 
-        //     const char * cc_wifi_ssid = json_doc["wifi_ssid"];
-        //     memcpy(buf_wifi_ssid, cc_wifi_ssid, strlen(cc_wifi_ssid));
+            const char * cc_hyg_email_pass = json_doc["hyg_email_pass"];
+            memcpy(buf_hyg_email_password, cc_hyg_email_pass, strlen(cc_hyg_email_pass));
 
-        //     const char * cc_wifi_pass = json_doc["wifi_pass"];
-        //     memcpy(buf_wifi_password, cc_wifi_pass, strlen(cc_wifi_pass));
+            const char * cc_to_email_addr = json_doc["email_to"];
+            memcpy(buf_to_email_address, cc_to_email_addr, strlen(cc_to_email_addr));
 
-        //     const char * cc_humidity_1 = json_doc["hum1"];
-        //     memcpy(buf_humidity_1, cc_humidity_1, strlen(cc_humidity_1));
+            const char * cc_wifi_ssid = json_doc["wifi_ssid"];
+            memcpy(buf_wifi_ssid, cc_wifi_ssid, strlen(cc_wifi_ssid));
+
+            const char * cc_wifi_pass = json_doc["wifi_pass"];
+            memcpy(buf_wifi_password, cc_wifi_pass, strlen(cc_wifi_pass));
+
+            const char * cc_humidity_1 = json_doc["hum1"];
+            memcpy(buf_humidity_1, cc_humidity_1, strlen(cc_humidity_1));
             
-        //     const char * cc_humidity_2 = json_doc["hum2"];
-        //     memcpy(buf_humidity_2, cc_humidity_2, strlen(cc_humidity_2));
+            const char * cc_humidity_2 = json_doc["hum2"];
+            memcpy(buf_humidity_2, cc_humidity_2, strlen(cc_humidity_2));
 
-        //     const char * cc_temperature_1 = json_doc["temp1"];
-        //     memcpy(buf_temperature_1, cc_temperature_1, strlen(cc_temperature_1));
+            const char * cc_temperature_1 = json_doc["temp1"];
+            memcpy(buf_temperature_1, cc_temperature_1, strlen(cc_temperature_1));
 
-        //     const char * cc_temperature_2 = json_doc["temp2"];
-        //     memcpy(buf_temperature_2, cc_temperature_2, strlen(cc_temperature_2));
+            const char * cc_temperature_2 = json_doc["temp2"];
+            memcpy(buf_temperature_2, cc_temperature_2, strlen(cc_temperature_2));
             
-        //     const char * cc_battery_voltage = json_doc["bat_v"];
-        //     memcpy(buf_battery_voltage, cc_battery_voltage, strlen(cc_battery_voltage));
+            const char * cc_battery_voltage = json_doc["bat_v"];
+            memcpy(buf_battery_voltage, cc_battery_voltage, strlen(cc_battery_voltage));
 
-        //     battery_too_low = json_doc["bat_low"];
+            battery_too_low = json_doc["bat_low"];
             
-        //     /**
-        //      * Base 64 Encode the email address
-        //      * as well as the password to the 
-        //      * email account.  
-        //      */
-        //     temp_length = strlen(cc_hyg_email_addr);
-        //     Base64.encode(buf_hyg_email_address_b64, buf_hyg_email_address, temp_length);
+            /**
+             * Base 64 Encode the email address
+             * as well as the password to the 
+             * email account.  
+             */
+            temp_length = strlen(cc_hyg_email_addr);
+            b64len = b64_encode(buf_hyg_email_address_b64, (char *)cc_hyg_email_addr, strlen(cc_hyg_email_addr));
 
-        //     temp_length = strlen(cc_hyg_email_pass);
-        //     Base64.encode(buf_hyg_email_password_b64, buf_hyg_email_password, temp_length);
+            temp_length = strlen(cc_hyg_email_pass);
+            b64len = b64_encode(buf_hyg_email_password_b64, (char *)cc_hyg_email_pass, strlen(cc_hyg_email_pass));
 
-        //     current_state = NETWORK_CONNECTION;
+            // b64_encode(&buf_hyg_email_address_b64, &buf_hyg_email_address, temp_length);
+            // String encoded_data_1 = encode(&buf_hyg_email_address, temp_length);
+
+            // temp_length = strlen(cc_hyg_email_pass);
+            // Base64.encode(&buf_hyg_email_password_b64, &buf_hyg_email_password, temp_length);
+            // b64_encode(&buf_hyg_email_password_b64, &buf_hyg_email_password, temp_length);
+
+            current_state = NETWORK_CONNECTION;
         
-        // break;
+        }
+        break;
         
 
         case NETWORK_CONNECTION:
@@ -145,7 +160,7 @@ void StateEvaluation( void ) {      //TODO: see babybot for example
             Gsender *gsender = Gsender::Instance();    // Get handle to Gsender
 
             // memcpy()
-            // gsender -> EMAILBASE64_PASSWORD = "just a test";
+            // gsender -> hyg_email_pass_base64 = "just a test";
 
             const char * subject = "Humidity Critical";
 
@@ -153,8 +168,15 @@ void StateEvaluation( void ) {      //TODO: see babybot for example
             // email_body =  "Humidity Critical: " + (String)global_hyg_val + 
                     // "% (critical trip point set to: " + (String)hyg_trip_point + "%).";
             
+
+            gsender -> SetPassword("TODO_remove_me");
+            // gsender -> SetPassword(&buf_hyg_email_address_b64);          //TODO put this line in
             
-            gsender -> SetPassword("Justatest");
+            gsender -> SetEmailBase64("TODO_remove_me");
+            // gsender -> SetEmailBase64(&buf_hyg_email_address_b64);       //TODO put this line in
+            
+            gsender -> SetEmailDecoded("TODO_remove_me");
+            // gsender -> SetEmailDecoded(&buf_hyg_email_address);      //TODO put this line in
             
             if(
                 (gsender->Subject(subject)->Send(buf_to_email_address, email_body))

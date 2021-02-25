@@ -17,19 +17,21 @@ class Gsender
         const int SMTP_PORT = 465;
         const char* SMTP_SERVER = "smtp.gmail.com";
         
-        // const char* EMAILBASE64_LOGIN = val_passed_in;   //Base64 format of email address
-        // const char* EMAILBASE64_PASSWORD = buf_hyg_email_password_b64;
+        // const char* hyg_email_addr_base64 = val_passed_in;   //Base64 format of email address
+        // const char* hyg_email_pass_base64 = buf_hyg_email_password_b64;
         // const char* FROM = buf_hyg_email_address;
         
         
         /**
          * TODO: cleanup stale code
          */
-        const char* EMAILBASE64_LOGIN = "Y2xpbnRvbi5kZWJ1Z0BnbWFpbC5jb20=";   //Base64 format of clinton.debug@gmail.com  -- use base64encode.org to create
-        const char* EMAILBASE64_PASSWORD = "TUdINTY3JiooNDI0MjYy";                 //Base64 format of password -- use base64encode.org to create
-        const char* FROM = "clinton.debug@gmail.com";
+        // const char* hyg_email_addr_base64 = "Y2xpbnRvbi5kZWJ1Z0BnbWFpbC5jb20=";   //Base64 format of clinton.debug@gmail.com  -- use base64encode.org to create
+        // const char* hyg_email_pass_base64 = "TUdINTY3JiooNDI0MjYy";                 //Base64 format of password -- use base64encode.org to create
+        // const char* FROM = "clinton.debug@gmail.com";
         
-        
+        char hyg_email_addr_base64[64];
+        char hyg_email_pass_base64[64];
+        char hyg_email_addr_decoded[32];           //Not base64 encoded
         
         const char* _error = nullptr;
         char* _subject = nullptr;
@@ -45,8 +47,9 @@ class Gsender
         /**
          * TODO:  CJG TEST CODE
          */
+        bool SetEmailBase64(const char* val);
         bool SetPassword(const char* val);                      //TODO TODO Added by CJG.  This, and the function in .cpp works!!! Now carry through for email address / etc. 
-
+        bool SetEmailDecoded(const char* val);
 
         /**
          * TODO: END CJG TEST CODE

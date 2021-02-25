@@ -81,21 +81,21 @@ bool Gsender::Send(const String &to, const String &message)
   AwaitSMTPResponse(client);
 
 #if defined(GS_SERIAL_LOG_2)
-  Serial.println("EMAILBASE64_LOGIN:");
+  Serial.println("hyg_email_addr_base64:");
 #endif
-  client.println(EMAILBASE64_LOGIN);
+  client.println(hyg_email_addr_base64);
   AwaitSMTPResponse(client);
 
 #if defined(GS_SERIAL_LOG_2)
-  Serial.println("EMAILBASE64_PASSWORD:");
+  Serial.println("hyg_email_pass_base64:");
 #endif
-  client.println(EMAILBASE64_PASSWORD);
+  client.println(hyg_email_pass_base64);
   if (!AwaitSMTPResponse(client, "235")) {
     _error = "SMTP AUTH error";
     return false;
   }
   
-  String mailFrom = "MAIL FROM: <" + String(FROM) + '>';
+  String mailFrom = "MAIL FROM: <" + String(hyg_email_addr_decoded) + '>';
 #if defined(GS_SERIAL_LOG_2)
   Serial.println(mailFrom);
 #endif
@@ -118,7 +118,7 @@ bool Gsender::Send(const String &to, const String &message)
     return false;
   }
   
-  client.println("From: <" + String(FROM) + '>');
+  client.println("From: <" + String(hyg_email_addr_decoded) + '>');
   client.println("To: <" + to + '>');
   
   client.print("Subject: ");
@@ -144,6 +144,16 @@ bool Gsender::Send(const String &to, const String &message)
 }
 
 bool Gsender::SetPassword(const char* val) {
-  EMAILBASE64_PASSWORD = val;
+  memcpy(&hyg_email_pass_base64, val, strlen(val));
   return true;
+}
+
+bool Gsender::SetEmailBase64(const char* val) {
+  memcpy(&hyg_email_addr_base64, val, strlen(val));
+  return true;
+}
+
+bool Gsender::SetEmailDecoded(const char* val) {
+  memcpy(&hyg_email_addr_decoded, val, strlen(val));
+
 }
