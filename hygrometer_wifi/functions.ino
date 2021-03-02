@@ -7,15 +7,28 @@ bool WiFiConnect( const char * ssid, const char * password ) {
     WiFi.begin(ssid, password);
 
     // Wait for connection
-    while (WiFi.status() != WL_CONNECTED && i < timeout) {
+    Serial.println("");
+    Serial.print("\tMy MAC address is: "); Serial.println(WiFi.macAddress());
+    Serial.print("\tConnecting to SSID: "); Serial.println(ssid);
+    Serial.print("\tSSID password: "); Serial.println(password);
+
+    
+    Serial.print("\tWiFi Connecting\t");
+    while ((WiFi.status() != WL_CONNECTED) && i < timeout) {
         delay(500);
-        // Serial.print(".");
+        i++;
+        Serial.print('.');
     }
+    Serial.println("");
 
     if(i == timeout){
+        Serial.println("\tWiFi Connection timeout!");
         return false;
     }
 
+    Serial.println("\tWiFi connected!");
+    Serial.print("\tMy local IP: ");
+    Serial.println(WiFi.localIP());
     return true;
 
     // Serial.println("");
@@ -41,10 +54,6 @@ void SerialReadtoArray ( void ) {
     
     memset(&data_input_string,'\0', MAX_RX_BUF_ELEMENTS);
 
-    // while (!Serial.available()) // TODO we entered this function on the basis of there being data
-    //     delay(10);
-    // }  
-
     rxchar = '\0';
     i = 0;
     timeout = 0;
@@ -56,7 +65,11 @@ void SerialReadtoArray ( void ) {
             data_input_string[i] = rxchar;
             i++;
             
-            if(i >= MAX_RX_BUF_INDEX) {
+            if(i > MAX_RX_BUF_INDEX) {
+                #if defined(ENABLE_LOGGING)
+                    Serial.println("\tSerial overflow.");
+                #endif
+                
                 break;
             }
 
@@ -73,19 +86,32 @@ void SerialReadtoArray ( void ) {
     }
 
     if(timeout == SER_TIMEOUT_MS) {
-        /**
-         * TODO: how to indicate this 
-         * error
-         */
-        delay(1);
-        // Serial.println("Timout!");
+        #if defined(ENABLE_LOGGING)
+            Serial.println("\t Serial receive timeout!");      //TODO may want to remove
+        #endif
     }
     
     FlushSerialRXBuffer();
+
+}
+
+void AssembleEmailMessage ( void ) {
     /**
-     * TODO: cleanup
+     * NOTE: Email message will look 
+     * something like the following
+     * 
+     * Humidity 1: 65.23
+     * Humidity 2: 67.25
+     * Temperature 1: 73.45
+     * Temperature 2: 73.44
+     * Battery voltage: 3.25
+     * Battery Low: false
      */
-    // Serial.print("Received string: "); Serial.println(data_input_string);
+    email_message =     "Humidity 1: " + String(humidity_1) + " % <br />";
+    email_message +=    "Humidity 2: " + String(humidity_2) + " % <br />";
+    email_message +=    "Temperature 1: " + String(temperature_1) + " &#176F <br />";
+    email_message +=    "Temperature 2: " + String(temperature_2) + " &#176F <br />";
+    email_message +=    "Battery Voltage: " + String(battery_v) + " V <br />";
 
-
+    
 }

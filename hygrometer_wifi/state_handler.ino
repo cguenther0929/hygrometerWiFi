@@ -1,19 +1,15 @@
-// #define HYG_EMAIL_ACC_KEY       "hyg_email_acc"
-// #define HYG_EMAIL_PASS_KEY      "hyg_email_pass"
-// #define WIFI_SSID_KEY           "wifi_ssid"
-// #define WIFI_PASS_KEY           "wifi_pass"
-// #define HUM_1_KEY               "hum1"
-// #define TEMP_1_KEY              "temp1"
-// #define HUM_2_KEY               "hum2"
-// #define TEMP_2_KEY              "temp2"
-// #define BAT_V_KEY               "bat_v"
-// #define BAT_SATUS_KEY           "bat_low"
+#define HYG_EMAIL_ACC_KEY       "hyg_email_acc"
+#define HYG_EMAIL_PASS_KEY      "hyg_email_pass"
+#define RECIPIENT_EMAIL_KEY     "email_to"
+#define WIFI_SSID_KEY           "wifi_ssid"
+#define WIFI_PASS_KEY           "wifi_pass"
+#define HUM_1_KEY               "hum1"
+#define TEMP_1_KEY              "temp1"
+#define HUM_2_KEY               "hum2"
+#define TEMP_2_KEY              "temp2"
+#define BAT_V_KEY               "bat_v"
+#define BAT_SATUS_KEY           "bat_low"
 
-
-// Gsender *gsender = Gsender::Instance();    // Get handle to Gsender
-// const char * subject = "Humidity Critical";
-
-// const char * email_body = "This is just a test";
 
 /* Setup initial state conditions */
 void StateInitialize( void ) {
@@ -39,158 +35,244 @@ void StateEvaluation( void ) {      //TODO: see babybot for example
              * state
              */
 
-            if(digitalRead(SLEEP_BIT)) {
-                current_state = DEEP_SLEEP;
-            }
+            current_state = WAITING_FOR_DATA;       //TODO take this line out
 
-            else {
-                current_state = WAITING_FOR_DATA;
-            }
+            /**
+             * TODO: put these lines 
+             * back in
+             */
+            // if(digitalRead(SLEEP_BIT)) {     
+            //     current_state = DEEP_SLEEP;
+            // }
+
+            // else {
+            //     current_state = WAITING_FOR_DATA;
+            // }
+            /**
+             * TODO: put these lines 
+             * back in
+             */
         
         break;
 
         case WAITING_FOR_DATA:
             
-            WiFi.forceSleepBegin();
-            delay(1);                   // There are claims a non-zero delay is required after calling force sleep
+            //TODO we may want the following back in
+            // WiFi.forceSleepBegin();         //TODO we may want to place this in other locations
+            // delay(1);                   // There are claims a non-zero delay is required after calling force sleep
+
+            // Serial.println(".");
             
-            if (!Serial.available()){
+            if (Serial.available() > 0){
+                                
                 SerialReadtoArray ();       // Blocking
+
+
+                delay(3000);
+                /**
+                 * TODO: remove stale code 
+                 */
+                Serial.print("Received string: "); Serial.println(data_input_string);
+            
+            
+                // Serial.println("DATA RECEIVED!");
+            
+                current_state = PARSE_INPUT_DATA;
+            
+            
             }  //Wait until serial data is available
-
-
-            /**
-             * TODO: remove stale code 
-             */
-            // Serial.print("Received string: "); Serial.println(data_input_string);
-
-            current_state = PARSE_INPUT_DATA;
 
         break;
         
         case PARSE_INPUT_DATA:
         {
-            // #include <Base64.h>// TODO remove
-
             int temp_length = 0;
             int b64len = 0;
 
+            #if defined(ENABLE_LOGGING)
+                Serial.println("\tParsing data.\n");
+            #endif
+
             json_err = deserializeJson(json_doc,data_input_string);
             if(json_err) {
-                Serial.print("Error: "); Serial.println(json_err.c_str());
+
+                #if defined(ENABLE_LOGGING)
+                    Serial.println("Json deserialize error.");
+                    Serial.print("Error: "); Serial.println(json_err.c_str());
+                #endif
+                
                 return;
             }
 
-            const char * cc_hyg_email_addr = json_doc["hyg_email_acc"];
+            /**
+             * Retrieve the hygrometer's email
+             * address as passed in via JSON
+             */
+            const char * cc_hyg_email_addr = json_doc[HYG_EMAIL_ACC_KEY];
             memcpy(buf_hyg_email_address, cc_hyg_email_addr, strlen(cc_hyg_email_addr));
+            
+            #if defined(ENABLE_LOGGING)
+                Serial.print("\tSTATE HDLR -- Email address passed in via JSON: ");
+                Serial.println(buf_hyg_email_address);
+            #endif
 
-            const char * cc_hyg_email_pass = json_doc["hyg_email_pass"];
+
+            /**
+             * Retrieve the hygrometer's email
+             * login password as passed in via JSON
+             */
+            const char * cc_hyg_email_pass = json_doc[HYG_EMAIL_PASS_KEY];
             memcpy(buf_hyg_email_password, cc_hyg_email_pass, strlen(cc_hyg_email_pass));
-
-            const char * cc_to_email_addr = json_doc["email_to"];
-            memcpy(buf_to_email_address, cc_to_email_addr, strlen(cc_to_email_addr));
-
-            const char * cc_wifi_ssid = json_doc["wifi_ssid"];
-            memcpy(buf_wifi_ssid, cc_wifi_ssid, strlen(cc_wifi_ssid));
-
-            const char * cc_wifi_pass = json_doc["wifi_pass"];
-            memcpy(buf_wifi_password, cc_wifi_pass, strlen(cc_wifi_pass));
-
-            const char * cc_humidity_1 = json_doc["hum1"];
-            memcpy(buf_humidity_1, cc_humidity_1, strlen(cc_humidity_1));
             
-            const char * cc_humidity_2 = json_doc["hum2"];
-            memcpy(buf_humidity_2, cc_humidity_2, strlen(cc_humidity_2));
+            #if defined(ENABLE_LOGGING)
+                Serial.print("\tSTATE HDLR -- Email login password passed in via JSON: ");
+                Serial.println(buf_hyg_email_password);
+            #endif
 
-            const char * cc_temperature_1 = json_doc["temp1"];
-            memcpy(buf_temperature_1, cc_temperature_1, strlen(cc_temperature_1));
-
-            const char * cc_temperature_2 = json_doc["temp2"];
-            memcpy(buf_temperature_2, cc_temperature_2, strlen(cc_temperature_2));
+            /**
+             * Retrieve the recipient's
+             * email address as passed in 
+             * via JSON
+             */
+            const char * cc_recipient_email_addr = json_doc[RECIPIENT_EMAIL_KEY];
+            memcpy(buf_recipient_email_addr, cc_recipient_email_addr, strlen(cc_recipient_email_addr));
             
-            const char * cc_battery_voltage = json_doc["bat_v"];
-            memcpy(buf_battery_voltage, cc_battery_voltage, strlen(cc_battery_voltage));
-
-            battery_too_low = json_doc["bat_low"];
+            #if defined(ENABLE_LOGGING)
+                Serial.print("\tSTATE HDLR -- Recipient email address passed in via JSON: ");
+                Serial.println(buf_recipient_email_addr);
+            #endif
             
             /**
-             * Base 64 Encode the email address
-             * as well as the password to the 
-             * email account.  
+             * Retrieve WiFi SSID
+             * as passed in via JSON
              */
-            temp_length = strlen(cc_hyg_email_addr);
-            b64len = b64_encode(buf_hyg_email_address_b64, (char *)cc_hyg_email_addr, strlen(cc_hyg_email_addr));
+            const char * cc_wifi_ssid = json_doc[WIFI_SSID_KEY];
+            memcpy(buf_wifi_ssid, cc_wifi_ssid, strlen(cc_wifi_ssid));
 
-            temp_length = strlen(cc_hyg_email_pass);
-            b64len = b64_encode(buf_hyg_email_password_b64, (char *)cc_hyg_email_pass, strlen(cc_hyg_email_pass));
+            #if defined(ENABLE_LOGGING)
+                Serial.print("\tSTATE HDLR -- WiFi SSID passed in via JSON: ");
+                Serial.println(buf_wifi_ssid);
+            #endif
 
-            // b64_encode(&buf_hyg_email_address_b64, &buf_hyg_email_address, temp_length);
-            // String encoded_data_1 = encode(&buf_hyg_email_address, temp_length);
+            /**
+             * Retrieve WiFi password
+             * as passed in via JSON
+             */
+            const char * cc_wifi_pass = json_doc[WIFI_PASS_KEY];
+            memcpy(buf_wifi_password, cc_wifi_pass, strlen(cc_wifi_pass));
 
-            // temp_length = strlen(cc_hyg_email_pass);
-            // Base64.encode(&buf_hyg_email_password_b64, &buf_hyg_email_password, temp_length);
-            // b64_encode(&buf_hyg_email_password_b64, &buf_hyg_email_password, temp_length);
+            #if defined(ENABLE_LOGGING)
+                Serial.print("\tSTATE HDLR -- WiFi password passed in via JSON: ");
+                Serial.println(buf_wifi_password);
+            #endif
 
-            current_state = NETWORK_CONNECTION;
+            /**
+             * Retrieve the first humidity
+             * value as passed in via JSON
+             */
+            humidity_1 = json_doc[HUM_1_KEY];
+            #if defined(ENABLE_LOGGING)
+                Serial.print("\tSTATE HDLR -- humidity 1 value passed in via JSON: ");
+                Serial.println(humidity_1);
+            #endif
+            
+            /**
+             * Retrieve the second humidity
+             * value as passed in via JSON
+             */
+            humidity_2 = json_doc[HUM_2_KEY];
+            #if defined(ENABLE_LOGGING)
+                Serial.print("\tSTATE HDLR -- humidity 2 value passed in via JSON: ");
+                Serial.println(humidity_2);
+            #endif
+
+            /**
+             * Retrieve the first temperature 
+             * value as passed in via JSON
+             */
+            temperature_1 = json_doc[TEMP_1_KEY];
+            #if defined(ENABLE_LOGGING)
+                Serial.print("\tSTATE HDLR -- temperature 1 value passed in via JSON: ");
+                Serial.println(temperature_1);
+            #endif
+            
+            /**
+             * Retrieve the first temperature 
+             * value as passed in via JSON
+             */
+            temperature_2 = json_doc[TEMP_2_KEY];
+            #if defined(ENABLE_LOGGING)
+                Serial.print("\tSTATE HDLR -- temperature 2 value passed in via JSON: ");
+                Serial.println(temperature_2);
+            #endif
+            
+            /**
+             * Retrieve battery voltage  
+             * value as passed in via JSON
+             */
+            battery_v = json_doc[BAT_V_KEY];
+            #if defined(ENABLE_LOGGING)
+                Serial.print("\tSTATE HDLR -- battery voltage passed in via JSON: ");
+                Serial.println(battery_v);
+            #endif
+            
+            /**
+             * Retrieve battery to low
+             * flag as passed in via JSON
+             */
+            battery_too_low = json_doc[BAT_SATUS_KEY];
+            #if defined(ENABLE_LOGGING)
+                Serial.print("\tSTATE HDLR -- battery too low flag passed in via JSON: ");
+                Serial.println(battery_too_low);
+            #endif
+            
+            current_state = NETWORK_CONNECTION;          //TODO this is the line that should be in
         
         }
         break;
         
 
         case NETWORK_CONNECTION:
-            // WiFi.forceSleepEnd();            /** TODO: might want to enable this or implement something similar */
-            
-            delay(1);               // There are claims that a non-zero delay is required after calling END
+            // WiFi.forceSleepWake();            /** TODO: might want to enable this or implement something similar */
+            // delay(1);                       // There are claims that a non-zero delay is required after calling the wake function
 
             if(!WiFiConnect(buf_wifi_ssid, buf_wifi_password)) {
+                Serial.println("Deep sleep.");
                 current_state = DEEP_SLEEP;
             }
 
             current_state = SEND_EMAIL;
 
-            /**
-             * TODO: Add code for making
-             * network connection...
-             */
         break;
 
         case SEND_EMAIL:
         {
-
-            Gsender *gsender = Gsender::Instance();    // Get handle to Gsender
-
-            // memcpy()
-            // gsender -> hyg_email_pass_base64 = "just a test";
-
-            const char * subject = "Humidity Critical";
-
-            const char * email_body = "This is just a test";
-            // email_body =  "Humidity Critical: " + (String)global_hyg_val + 
-                    // "% (critical trip point set to: " + (String)hyg_trip_point + "%).";
+            EMailSender emailSend(buf_hyg_email_address, buf_hyg_email_password);
             
 
-            gsender -> SetPassword("TODO_remove_me");
-            // gsender -> SetPassword(&buf_hyg_email_address_b64);          //TODO put this line in
+            EMailSender::EMailMessage message;
+            message.subject = "Hygrometer Status";
             
-            gsender -> SetEmailBase64("TODO_remove_me");
-            // gsender -> SetEmailBase64(&buf_hyg_email_address_b64);       //TODO put this line in
+            AssembleEmailMessage();
             
-            gsender -> SetEmailDecoded("TODO_remove_me");
-            // gsender -> SetEmailDecoded(&buf_hyg_email_address);      //TODO put this line in
-            
-            if(
-                (gsender->Subject(subject)->Send(buf_to_email_address, email_body))
-                ) 
-            {
-                __asm__("nop\n\t");
-            } 
-            
-            else {
-                Serial.print("Error sending message: ");
-                Serial.println(gsender->getError());
-            }
+            message.message = email_message;
 
-            current_state = DEEP_SLEEP;
+            // EMailSender::Response resp = emailSend.send("clinton.guenther@gmail.com", message);      //Original line
+            EMailSender::Response resp = emailSend.send(buf_recipient_email_addr, message);
+
+            #if defined(ENABLE_LOGGING)
+                Serial.println("");    
+                Serial.println("Sending status: ");
+
+                Serial.println(resp.status);
+                Serial.println(resp.code);
+                Serial.println(resp.desc);
+
+                Serial.println("");
+            #endif
+
+            // current_state = DEEP_SLEEP;
+            current_state = WAITING_FOR_DATA;       //TODO this should be deep sleep
 
 
         }
