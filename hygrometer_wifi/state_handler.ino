@@ -58,8 +58,8 @@ void StateEvaluation( void ) {      //TODO: see babybot for example
         case WAITING_FOR_DATA:
             
             //TODO we may want the following back in
-            // WiFi.forceSleepBegin();         //TODO we may want to place this in other locations
-            // delay(1);                   // There are claims a non-zero delay is required after calling force sleep
+            WiFi.forceSleepBegin();         //TODO we may want to place this in other locations
+            delay(1);                   // There are claims a non-zero delay is required after calling force sleep
 
             // Serial.println(".");
             
@@ -68,14 +68,10 @@ void StateEvaluation( void ) {      //TODO: see babybot for example
                 SerialReadtoArray ();       // Blocking
 
 
-                delay(3000);
-                /**
-                 * TODO: remove stale code 
-                 */
-                Serial.print("Received string: "); Serial.println(data_input_string);
+                #if defined(ENABLE_LOGGING)
+                    Serial.print("\Received string: "); Serial.println(data_input_string);
+                #endif
             
-            
-                // Serial.println("DATA RECEIVED!");
             
                 current_state = PARSE_INPUT_DATA;
             
@@ -233,8 +229,9 @@ void StateEvaluation( void ) {      //TODO: see babybot for example
         
 
         case NETWORK_CONNECTION:
-            // WiFi.forceSleepWake();            /** TODO: might want to enable this or implement something similar */
-            // delay(1);                       // There are claims that a non-zero delay is required after calling the wake function
+            
+            WiFi.forceSleepWake();            /** TODO: might want to enable this or implement something similar */
+            delay(1);                       // There are claims that a non-zero delay is required after calling the wake function
 
             if(!WiFiConnect(buf_wifi_ssid, buf_wifi_password)) {
                 Serial.println("Deep sleep.");

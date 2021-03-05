@@ -6,13 +6,20 @@ bool WiFiConnect( const char * ssid, const char * password ) {
     
     WiFi.begin(ssid, password);
 
-    // Wait for connection
-    Serial.println("");
-    Serial.print("\tMy MAC address is: "); Serial.println(WiFi.macAddress());
-    Serial.print("\tConnecting to SSID: "); Serial.println(ssid);
-    Serial.print("\tSSID password: "); Serial.println(password);
+    /**
+     * Print diagnostic data
+     * for WiFi if logging
+     * is enabled
+     */
+    #if defined(ENABLE_LOGGING)
+        Serial.println("");
+        Serial.print("\tMy MAC address is: "); Serial.println(WiFi.macAddress());
+        Serial.print("\tConnecting to SSID: "); Serial.println(ssid);
+        Serial.print("\tSSID password: "); Serial.println(password);
+    #endif
 
     
+    // Wait for connection
     Serial.print("\tWiFi Connecting\t");
     while ((WiFi.status() != WL_CONNECTED) && i < timeout) {
         delay(500);
@@ -22,20 +29,19 @@ bool WiFiConnect( const char * ssid, const char * password ) {
     Serial.println("");
 
     if(i == timeout){
+    #if defined(ENABLE_LOGGING)
         Serial.println("\tWiFi Connection timeout!");
         return false;
     }
 
-    Serial.println("\tWiFi connected!");
-    Serial.print("\tMy local IP: ");
-    Serial.println(WiFi.localIP());
+    #if defined(ENABLE_LOGGING)
+        Serial.println("\tWiFi connected!");
+        Serial.print("\tMy local IP: ");
+        Serial.println(WiFi.localIP());
+    #endif
+
     return true;
 
-    // Serial.println("");
-    // Serial.print("Connected to ");
-    // Serial.println(ssid);
-    // Serial.print("IP address: ");
-    // Serial.println(WiFi.localIP());
   
 }
 
@@ -109,8 +115,8 @@ void AssembleEmailMessage ( void ) {
      */
     email_message =     "Humidity 1: " + String(humidity_1) + " % <br />";
     email_message +=    "Humidity 2: " + String(humidity_2) + " % <br />";
-    email_message +=    "Temperature 1: " + String(temperature_1) + " &#176F <br />";
-    email_message +=    "Temperature 2: " + String(temperature_2) + " &#176F <br />";
+    email_message +=    "Temperature 1: " + String(temperature_1) + " °F <br />";
+    email_message +=    "Temperature 2: " + String(temperature_2) + " °F <br />";
     email_message +=    "Battery Voltage: " + String(battery_v) + " V <br />";
 
     
