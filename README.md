@@ -13,6 +13,8 @@ It is necessary to include esp8266 libraries. First, it must be verified that th
 
 After including the necessary board manager URL, navigate to *tools > board > boards manager*, and install the ESP8266 manager.  The appropriate one will be listed as *written by the "community"*.
 
+It is necessary to install the  **ArduinoJson**  library.  To do so, click on *Tools > Include Libraries > Manage Libraries*.  Within the library manager, serach for **ArduinoJson**, and install version 6.18.0 (version installed at the time of writing this).  
+
 ### COMPILING ###
 The digital hygrometer utilizes a bare ESP8266 WiFi SOM.  For proper compilation, the target board shall be  *Generic ESP8266 Module*.  
 

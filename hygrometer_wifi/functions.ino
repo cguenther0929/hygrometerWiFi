@@ -33,6 +33,7 @@ bool WiFiConnect( const char * ssid, const char * password ) {
         Serial.println("\tWiFi Connection timeout!");
         return false;
     }
+    #endif
 
     #if defined(ENABLE_LOGGING)
         Serial.println("\tWiFi connected!");
