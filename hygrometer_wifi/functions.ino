@@ -65,6 +65,7 @@ void SerialReadtoArray ( void ) {
     i = 0;
     timeout = 0;
 
+
     while(rxchar != '}') {
 
         if(Serial.available()) {

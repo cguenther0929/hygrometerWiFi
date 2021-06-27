@@ -183,7 +183,7 @@ void setup(void) {
    */
   pinMode(SLEEP_BIT, INPUT);
 
-  Serial.begin(115200);
+  Serial.begin(57600);
   Serial.setTimeout(50);    //Timeout value in ms -- max is 1000
   
   current_state = EVALUATE_SLEEP_BIT;

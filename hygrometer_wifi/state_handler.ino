@@ -57,9 +57,9 @@ void StateEvaluation( void ) {      //TODO: see babybot for example
 
         case WAITING_FOR_DATA:
             
-            //TODO we may want the following back in
-            WiFi.forceSleepBegin();         //TODO we may want to place this in other locations
-            delay(1);                   // There are claims a non-zero delay is required after calling force sleep
+            //TODO the following was in for testing only
+            // WiFi.forceSleepBegin();         //TODO we may want to place this in other locations
+            // delay(1);                   // There are claims a non-zero delay is required after calling force sleep
 
             // Serial.println(".");
             
