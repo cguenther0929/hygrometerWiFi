@@ -64,6 +64,11 @@ state current_state = UNKNOWN;
  */
 #define SER_TIMEOUT_MS            100
 
+/**
+ * Error LED
+*/
+#define WIFI_ERR_LED              12
+
 
 /**
  * Data imported 
@@ -76,11 +81,11 @@ char buf_hyg_email_address[64];   // Email address hygrometer used to send email
 char buf_hyg_email_password[64];  // Account password for aforementioned email address 
 char buf_recipient_email_addr[64];    // Email recipient
 
-int humidity_1        = 0;
-int humidity_2        = 0;
-int temperature_1     = 0;
-int temperature_2     = 0;
-int battery_v         = 0;
+float humidity_1        = 0;
+float humidity_2        = 0;
+float temperature_1     = 0;
+float temperature_2     = 0;
+float battery_v         = 0;
 bool battery_too_low  = false; 
 
 /**
@@ -182,6 +187,9 @@ void setup(void) {
    * Setup pin directions
    */
   pinMode(SLEEP_BIT, INPUT);
+  pinMode(WIFI_ERR_LED, OUTPUT);
+
+  digitalWrite(WIFI_ERR_LED, LOW);
 
   Serial.begin(57600);
   Serial.setTimeout(50);    //Timeout value in ms -- max is 1000
