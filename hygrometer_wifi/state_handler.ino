@@ -8,14 +8,8 @@
 #define HUM_2_KEY               "hum2"
 #define TEMP_2_KEY              "temp2"
 #define BAT_V_KEY               "bat_v"
-#define BAT_SATUS_KEY           "bat_low"
+#define BAT_SATUS_KEY           "bat_low"       //TODO is this variable now dead?  Remove?
 
-
-/* Setup initial state conditions */
-void StateInitialize( void ) {
-    delay(1);
-  
-}
 
 /**
  * TOOD:
@@ -35,23 +29,15 @@ void StateEvaluation( void ) {      //TODO: see babybot for example
              * state
              */
 
-            current_state = WAITING_FOR_DATA;       //TODO take this line out
+            // current_state = WAITING_FOR_DATA;       //TODO take this line out
 
-            /**
-             * TODO: put these lines 
-             * back in
-             */
-            // if(digitalRead(SLEEP_BIT)) {     
-            //     current_state = DEEP_SLEEP;
-            // }
+            if(digitalRead(SLEEP_BIT)) {     
+                current_state = DEEP_SLEEP;
+            }
 
-            // else {
-            //     current_state = WAITING_FOR_DATA;
-            // }
-            /**
-             * TODO: put these lines 
-             * back in
-             */
+            else {
+                current_state = WAITING_FOR_DATA;
+            }
         
         break;
 
@@ -77,6 +63,11 @@ void StateEvaluation( void ) {      //TODO: see babybot for example
             
             
             }  //Wait until serial data is available
+
+            /**
+             * ELSE
+             * we contine to wait for new data...
+             */
 
         break;
         
@@ -213,7 +204,7 @@ void StateEvaluation( void ) {      //TODO: see babybot for example
             #endif
             
             /**
-             * Retrieve battery to low
+             * Retrieve battery too low
              * flag as passed in via JSON
              */
             battery_too_low = json_doc[BAT_SATUS_KEY];
@@ -268,14 +259,18 @@ void StateEvaluation( void ) {      //TODO: see babybot for example
                 Serial.println("");
             #endif
 
-            // current_state = DEEP_SLEEP;
-            current_state = WAITING_FOR_DATA;       //TODO this should be deep sleep
+            current_state = DEEP_SLEEP;         //TODO this is the line we want
+            // current_state = WAITING_FOR_DATA;       //TODO this should be deep sleep
 
 
         }
         break;
 
         case DEEP_SLEEP:
+            //TODO in for debugging only
+            // digitalWrite(WIFI_ERR_LED, HIGH);
+            digitalWrite(WIFI_ERR_LED, LOW);
+            
             /**
              * Put module into deep sleep.
              * Only a reset can wake the module!

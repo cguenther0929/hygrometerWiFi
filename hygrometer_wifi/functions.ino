@@ -120,6 +120,12 @@ void AssembleEmailMessage ( void ) {
     email_message +=    "Temperature 1: " + String(temperature_1) + " °F <br />";
     email_message +=    "Temperature 2: " + String(temperature_2) + " °F <br />";
     email_message +=    "Battery Voltage: " + String(battery_v) + " V <br />";
+    if(battery_too_low) {
+        email_message +=    "Battery Low: True <br />";
+    }
+    else {
+        email_message +=    "Battery Low: False <br />";
+    }
 
     
 }
