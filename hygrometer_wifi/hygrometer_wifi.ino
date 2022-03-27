@@ -77,8 +77,9 @@ state current_state = UNKNOWN;
 char buf_wifi_password[32];
 char buf_wifi_ssid[32];
 
-char buf_hyg_email_address[64];   // Email address hygrometer used to send emails
-char buf_hyg_email_password[64];  // Account password for aforementioned email address 
+char buf_hyg_name[32];                // Email address hygrometer used to send emails
+char buf_hyg_email_address[64];       // Email address hygrometer used to send emails
+char buf_hyg_email_password[64];      // Account password for aforementioned email address 
 char buf_recipient_email_addr[64];    // Email recipient
 
 float humidity_1        = 0;

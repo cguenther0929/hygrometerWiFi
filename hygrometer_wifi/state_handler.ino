@@ -1,3 +1,4 @@
+#define HYG_NAME_KEY            "hyg_name"
 #define HYG_EMAIL_ACC_KEY       "hyg_email_acc"
 #define HYG_EMAIL_PASS_KEY      "hyg_email_pass"
 #define RECIPIENT_EMAIL_KEY     "email_to"
@@ -91,6 +92,18 @@ void StateEvaluation( void ) {      //TODO: see babybot for example
                 return;
             }
 
+            /**
+             * Retrieve the hygrometer's 
+             * name 
+             */
+            const char * cc_hyg_name = json_doc[HYG_NAME_KEY];
+            memcpy(buf_hyg_name, cc_hyg_name, strlen(cc_hyg_name));
+            
+            #if defined(ENABLE_LOGGING)
+                Serial.print("\tSTATE HDLR -- Email address passed in via JSON: ");
+                Serial.println(buf_hyg_name);
+            #endif
+            
             /**
              * Retrieve the hygrometer's email
              * address as passed in via JSON
