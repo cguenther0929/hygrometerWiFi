@@ -1,7 +1,8 @@
 #define HYG_NAME_KEY            "hyg_name"
-#define HYG_EMAIL_ACC_KEY       "hyg_email_acc"
-#define HYG_EMAIL_PASS_KEY      "hyg_email_pass"
+#define HYG_SMTP2GO_ACC_KEY     "hyg_smtp2go_acc"
+#define HYG_SMTP2GO_PASS_KEY    "hyg_smtp2go_pass"
 #define RECIPIENT_EMAIL_KEY     "email_to"
+#define SENDER_EMAIL_KEY        "email_from"
 #define WIFI_SSID_KEY           "wifi_ssid"
 #define WIFI_PASS_KEY           "wifi_pass"
 #define HUM_1_KEY               "hum1"
@@ -44,12 +45,6 @@ void StateEvaluation( void ) {      //TODO: see babybot for example
 
         case WAITING_FOR_DATA:
             
-            //TODO the following was in for testing only
-            // WiFi.forceSleepBegin();         //TODO we may want to place this in other locations
-            // delay(1);                   // There are claims a non-zero delay is required after calling force sleep
-
-            // Serial.println(".");
-            
             if (Serial.available() > 0){
                                 
                 SerialReadtoArray ();       // Blocking
@@ -67,7 +62,7 @@ void StateEvaluation( void ) {      //TODO: see babybot for example
 
             /**
              * ELSE
-             * we contine to wait for new data...
+             * we continue to wait for new data...
              */
 
         break;
@@ -82,6 +77,8 @@ void StateEvaluation( void ) {      //TODO: see babybot for example
             #endif
 
             json_err = deserializeJson(json_doc,data_input_string);
+            Serial.println("\t***DEBUG Here 1.\n");     //TODO need to remove this line!!
+            
             if(json_err) {
 
                 #if defined(ENABLE_LOGGING)
@@ -89,7 +86,9 @@ void StateEvaluation( void ) {      //TODO: see babybot for example
                     Serial.print("Error: "); Serial.println(json_err.c_str());
                 #endif
                 
-                return;
+                FlushSerialRXBuffer();
+                current_state = WAITING_FOR_DATA;
+                break;
             }
 
             /**
@@ -108,25 +107,26 @@ void StateEvaluation( void ) {      //TODO: see babybot for example
              * Retrieve the hygrometer's email
              * address as passed in via JSON
              */
-            const char * cc_hyg_email_addr = json_doc[HYG_EMAIL_ACC_KEY];
-            memcpy(buf_hyg_email_address, cc_hyg_email_addr, strlen(cc_hyg_email_addr));
+            const char * cc_hyg_smtp2go_acc = json_doc[HYG_SMTP2GO_ACC_KEY];
+            memcpy(buf_hyg_smtp2go_account, cc_hyg_smtp2go_acc, strlen(cc_hyg_smtp2go_acc));
             
             #if defined(ENABLE_LOGGING)
                 Serial.print("\tSTATE HDLR -- Email address passed in via JSON: ");
-                Serial.println(buf_hyg_email_address);
+                Serial.println(buf_hyg_smtp2go_account);
             #endif
 
 
             /**
-             * Retrieve the hygrometer's email
-             * login password as passed in via JSON
+             * Retrieve the hygrometer's SMTP2GO
+             * accounts password as passed in 
+             * via JSON
              */
-            const char * cc_hyg_email_pass = json_doc[HYG_EMAIL_PASS_KEY];
-            memcpy(buf_hyg_email_password, cc_hyg_email_pass, strlen(cc_hyg_email_pass));
+            const char * cc_hyg_smtp2go_pass = json_doc[HYG_SMTP2GO_PASS_KEY];
+            memcpy(buf_hyg_smtp2go_password, cc_hyg_smtp2go_pass, strlen(cc_hyg_smtp2go_pass));
             
             #if defined(ENABLE_LOGGING)
                 Serial.print("\tSTATE HDLR -- Email login password passed in via JSON: ");
-                Serial.println(buf_hyg_email_password);
+                Serial.println(buf_hyg_smtp2go_password);
             #endif
 
             /**
@@ -142,6 +142,18 @@ void StateEvaluation( void ) {      //TODO: see babybot for example
                 Serial.println(buf_recipient_email_addr);
             #endif
             
+            /**
+             * Retrieve sender's email
+             * address 
+             */
+            const char * cc_sender_email_addr = json_doc[SENDER_EMAIL_KEY];
+            memcpy(buf_sender_email_addr, cc_sender_email_addr, strlen(cc_sender_email_addr));
+            
+            #if defined(ENABLE_LOGGING)
+                Serial.print("\tSTATE HDLR -- Sender email address passed in via JSON: ");
+                Serial.println(buf_sender_email_addr);
+            #endif
+
             /**
              * Retrieve WiFi SSID
              * as passed in via JSON
@@ -226,19 +238,20 @@ void StateEvaluation( void ) {      //TODO: see babybot for example
                 Serial.println(battery_too_low);
             #endif
             
-            current_state = NETWORK_CONNECTION;          //TODO this is the line that should be in
+            current_state = NETWORK_CONNECTION;          
         
         }
         break;
         
-
         case NETWORK_CONNECTION:
             
             WiFi.forceSleepWake();            /** TODO: might want to enable this or implement something similar */
             delay(1);                       // There are claims that a non-zero delay is required after calling the wake function
 
             if(!WiFiConnect(buf_wifi_ssid, buf_wifi_password)) {
-                Serial.println("Deep sleep.");
+                #if defined(ENABLE_LOGGING)
+                    Serial.println("Deep sleep.");
+                #endif
                 current_state = DEEP_SLEEP;
             }
 
@@ -248,30 +261,235 @@ void StateEvaluation( void ) {      //TODO: see babybot for example
 
         case SEND_EMAIL:
         {
-            EMailSender emailSend(buf_hyg_email_address, buf_hyg_email_password);
-            
-
-            EMailSender::EMailMessage message;
-            message.subject = "Hygrometer Status";
-            
             AssembleEmailMessage();
-            
-            message.message = email_message;
 
-            // EMailSender::Response resp = emailSend.send("clinton.guenther@gmail.com", message);      //Original line
-            EMailSender::Response resp = emailSend.send(buf_recipient_email_addr, message);
+            if (client.connect(server, 2525) == 1) {
+                #if defined(ENABLE_LOGGING)
+                    Serial.println(F("connected"));
+                #endif
+            } else {
+                #if defined(ENABLE_LOGGING)
+                    Serial.println(F("connection failed"));
+                #endif
+                return;
+            }
+            if (!eRcv()) return;
 
             #if defined(ENABLE_LOGGING)
-                Serial.println("");    
-                Serial.println("Sending status: ");
-
-                Serial.println(resp.status);
-                Serial.println(resp.code);
-                Serial.println(resp.desc);
-
-                Serial.println("");
+                Serial.println(F("Sending EHLO"));
+            #endif
+            client.println("EHLO www.example.com");
+            if (!eRcv()) return;
+            #if defined(ENABLE_LOGGING)
+                Serial.println(F("Sending auth login"));
             #endif
 
+            client.println("auth login");
+            if (!eRcv()) return;
+            #if defined(ENABLE_LOGGING)
+                Serial.println(F("Sending User"));
+            #endif
+            
+            // The following shall be the base 64 encoded
+            //SMTP2GO account username
+            client.println(buf_hyg_smtp2go_account); //B64 encoded SMTP2GO username
+            if (!eRcv()) return;
+            #if defined(ENABLE_LOGGING)
+                Serial.println(F("Sending Password"));
+            #endif
+            
+            // change to your base64, ASCII encoded password
+            // Base64 password -->  MJ%dfh*&45  <-- for SMTP2GO
+            // This password must have been generated by SMTP2GO
+            // I was allowed to log in using this password.  
+            #if defined(ENABLE_LOGGING)
+                Serial.print(F("SMTP2GO Account Password: "));
+                Serial.println(buf_hyg_smtp2go_password);
+            #endif
+            client.println(buf_hyg_smtp2go_password);  
+            if (!eRcv()){
+                #if defined(ENABLE_LOGGING)
+                    Serial.println(F("\t*** Error sending SMTP2GO password"));
+                #endif
+                FlushSerialRXBuffer( );
+                current_state = WAITING_FOR_DATA;        //TODO do we want this or the sleep state?
+                break;
+            }
+            
+            /**
+             * @brief Command for MAIL From:
+             * i.e.  --> client.println(F("MAIL From: clinton.debug@gmail.com"));
+             * 
+             */
+            memset(buf_temp, 0, TEMP_BUF_SIZE);
+            strcpy(buf_temp, "MAIL From: ");
+            strcat(buf_temp, buf_sender_email_addr);
+            client.println(buf_temp);
+            if (!eRcv()){
+                #if defined(ENABLE_LOGGING)
+                    Serial.print(F("\t*** Error on command: "));
+                    Serial.println(buf_temp);
+                #endif
+                FlushSerialRXBuffer( );
+                current_state = WAITING_FOR_DATA;        //TODO do we want this or the sleep state?
+                break;
+            }
+            
+            /**
+             * @brief Enter recipient address
+             * First, fill temp buffer with null characters
+             * i.e.  -->  client.println(F("RCPT To: clinton.guenther@gmail.com"));
+             * 
+             */
+            #if defined(ENABLE_LOGGING)
+                Serial.print(F("Sending To: "));
+                Serial.println(buf_recipient_email_addr);
+            #endif
+            
+            memset(buf_temp, 0, TEMP_BUF_SIZE);
+            strcpy(buf_temp, "RCPT To: ");
+            strcat(buf_temp, buf_recipient_email_addr);
+            
+            client.println(buf_temp);
+            if (!eRcv()){
+                #if defined(ENABLE_LOGGING)
+                    Serial.print(F("\t*** Error on command: "));
+                    Serial.println(buf_temp);
+                #endif
+                FlushSerialRXBuffer( );
+                current_state = WAITING_FOR_DATA;        //TODO do we want this or the sleep state?
+                break;
+            }
+            
+            #if defined(ENABLE_LOGGING)
+                Serial.println(F("Sending DATA"));
+            #endif
+
+            client.println(F("DATA"));
+            if (!eRcv()){
+                #if defined(ENABLE_LOGGING)
+                    Serial.println(F("\t*** Error on command \"DATA\"."));
+                #endif
+                FlushSerialRXBuffer( );
+                current_state = WAITING_FOR_DATA;        //TODO do we want this or the sleep state?
+                break;
+            }
+            
+            #if defined(ENABLE_LOGGING)
+                Serial.println(F("Sending email"));
+            #endif
+            
+            /**
+             * @brief Sending To: command
+             * i.e.  --> client.println(F("To: clinton.guenther@gmail.com"));
+             */
+             client.println(F("To: clinton.guenther@gmail.com"));
+            // memset(buf_temp, 0, TEMP_BUF_SIZE);
+            // strcpy(buf_temp, "To: ");
+            // strcat(buf_temp, buf_recipient_email_addr);
+            // client.println(buf_temp);
+            // Serial.print("\t*** DEBUG To: command");
+            // Serial.println(buf_temp);
+            if (!eRcv()){
+                #if defined(ENABLE_LOGGING)
+                    Serial.println(F("\t*** Error on command \"To:\"."));
+                #endif
+                FlushSerialRXBuffer( );
+                current_state = WAITING_FOR_DATA;        //TODO do we want this or the sleep state?
+                break;
+            }
+
+            /**
+             * @brief Sending From: command
+             * i.e. -->  client.println(F("From: clinton.debug@gmail.com"));
+             */
+            memset(buf_temp, 0, TEMP_BUF_SIZE);
+            strcpy(buf_temp, "From: ");
+            strcat(buf_temp, buf_sender_email_addr);
+            client.println(buf_temp);
+
+            /**
+             * @brief Send the subject
+             */
+            client.println(F("Subject: Hygrometer Health Report\r\n"));
+
+            client.println(email_message);
+
+            client.println(F("."));
+            if (!eRcv()){
+                #if defined(ENABLE_LOGGING)
+                    Serial.println(F("\t*** Sending DOT to complete transaction"));
+                #endif
+                FlushSerialRXBuffer( );
+                current_state = WAITING_FOR_DATA;        //TODO do we want this or the sleep state?
+                break;
+            }
+            
+            #if defined(ENABLE_LOGGING)
+                Serial.println(F("Sending QUIT"));
+            #endif
+                        
+            client.println(F("QUIT"));
+            if (!eRcv()){
+                #if defined(ENABLE_LOGGING)
+                    Serial.println(F("\t*** Error sending \"QUIT\"."));
+                #endif
+                FlushSerialRXBuffer( );
+                current_state = WAITING_FOR_DATA;        //TODO do we want this or the sleep state?
+                break;
+            }
+            
+            client.stop();
+            
+            #if defined(ENABLE_LOGGING)
+            Serial.println(F("disconnected"));
+            #endif
+
+            // return 1;
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            // EMailSender emailSend(buf_hyg_smtp2go_account, buf_hyg_smtp2go_password);
+            
+
+            // EMailSender::EMailMessage message;
+            // message.subject = "Hygrometer Status";
+            
+            // AssembleEmailMessage();
+            
+            // message.message = email_message;
+
+            // // EMailSender::Response resp = emailSend.send("clinton.guenther@gmail.com", message);      //Original line
+            // EMailSender::Response resp = emailSend.send(buf_recipient_email_addr, message);
+
+            // #if defined(ENABLE_LOGGING)
+            //     Serial.println("");    
+            //     Serial.println("Sending status: ");
+
+            //     Serial.println(resp.status);
+            //     Serial.println(resp.code);
+            //     Serial.println(resp.desc);
+
+            //     Serial.println("");
+            // #endif
+            
             current_state = DEEP_SLEEP;         //TODO this is the line we want
             // current_state = WAITING_FOR_DATA;       //TODO this should be deep sleep
 

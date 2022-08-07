@@ -46,6 +46,38 @@ bool WiFiConnect( const char * ssid, const char * password ) {
   
 }
 
+byte eRcv()
+{
+  byte respCode;
+  byte thisByte;
+  int loopCount = 0;
+
+  while (!client.available()) {
+    delay(1);
+    loopCount++;
+    // if nothing received for 10 seconds, timeout
+    if (loopCount > 10000) {
+      client.stop();
+      Serial.println(F("\r\nTimeout"));
+      return 0;
+    }
+  }
+
+  respCode = client.peek();
+  while (client.available())
+  {
+    thisByte = client.read();
+    Serial.write(thisByte);
+  }
+
+  if (respCode >= '4')
+  {
+    //  efail();
+    return 0;
+  }
+  return 1;
+}
+
 void FlushSerialRXBuffer( void ){
     char rxchar;    
     
@@ -107,7 +139,7 @@ void AssembleEmailMessage ( void ) {
     /**
      * NOTE: Email message will look 
      * something like the following
-     * 
+     * Hygrometer's Name: "My Name is.."
      * Humidity 1: 65.23
      * Humidity 2: 67.25
      * Temperature 1: 73.45
@@ -115,16 +147,17 @@ void AssembleEmailMessage ( void ) {
      * Battery voltage: 3.25
      * Battery Low: false
      */
-    email_message =     "Humidity 1: " + String(humidity_1) + " % <br />";
-    email_message +=    "Humidity 2: " + String(humidity_2) + " % <br />";
-    email_message +=    "Temperature 1: " + String(temperature_1) + " °F <br />";
-    email_message +=    "Temperature 2: " + String(temperature_2) + " °F <br />";
-    email_message +=    "Battery Voltage: " + String(battery_v) + " V <br />";
+    email_message =     "Hygrometer: " + String(buf_hyg_name) + "\r\n";
+    email_message +=    "Humidity 1: " + String(humidity_1) + " % \r\n";
+    email_message +=    "Humidity 2: " + String(humidity_2) + " % \r\n";
+    email_message +=    "Temperature 1: " + String(temperature_1) + " \u00B0 F \r\n";
+    email_message +=    "Temperature 2: " + String(temperature_2) + " \u00B0 F \r\n";
+    email_message +=    "Battery Voltage: " + String(battery_v) + " V \r\n";
     if(battery_too_low) {
-        email_message +=    "Battery Low: True <br />";
+        email_message +=    "Battery Low: True \r\n";
     }
     else {
-        email_message +=    "Battery Low: False <br />";
+        email_message +=    "Battery Low: False \r\n";
     }
 
     

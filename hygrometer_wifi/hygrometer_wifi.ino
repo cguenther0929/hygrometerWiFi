@@ -4,11 +4,11 @@
 */
 
 #include <ESP8266WiFi.h>
-#include <WiFiClientSecure.h>   //TODO does adding this in break anything?
+// #include <WiFiClientSecure.h>   //TODO does adding this in break anything?
 #include <ArduinoJson.h>
 #include <pins_arduino.h>
 #include <Ticker.h>
-#include "EMailSender.h"
+// #include "EMailSender.h"
 
 /**
  * Uncomment the following 
@@ -57,6 +57,7 @@ state current_state = UNKNOWN;
  * WiFi Parameters
  */
 #define WIFI_CONNECT_TIMEOUT_S    10
+WiFiClient client;
 
 /**
  * Serial port 
@@ -78,31 +79,27 @@ char buf_wifi_password[32];
 char buf_wifi_ssid[32];
 
 char buf_hyg_name[32];                // Email address hygrometer used to send emails
-char buf_hyg_email_address[64];       // Email address hygrometer used to send emails
-char buf_hyg_email_password[64];      // Account password for aforementioned email address 
-char buf_recipient_email_addr[64];    // Email recipient
+char buf_hyg_smtp2go_account[64];       // Email address hygrometer used to send emails
+char buf_hyg_smtp2go_password[64];      // Account password for aforementioned email address 
+char buf_recipient_email_addr[64];    // Email address of recipient
+char buf_sender_email_addr[64];       // Email address of sender
+
+#define TEMP_BUF_SIZE        64
+char buf_temp[TEMP_BUF_SIZE];             // Temporary buffer that can be used for building strings
 
 float humidity_1        = 0;
 float humidity_2        = 0;
 float temperature_1     = 0;
 float temperature_2     = 0;
 float battery_v         = 0;
-bool battery_too_low  = false; 
+bool battery_too_low    = false; 
 
 /**
- * Email message to 
- * send
+ * Email related parameters
  */
 String email_message = "";
+char server[] = "mail.smtp2go.com";   //CJG added this line 7/27/22
 
-
-/**
- * Set trip flags 
- * These are hard coded,
- * for now
- */
-float           hyg_trip_point = 63;            // Minimum allowed humidity
-float           bat_trip_voltage = 3.86;        // Minimum allowed battery voltage
 
 /**
  * Timer parameters
@@ -180,8 +177,6 @@ void loop(void)
   }
 }
 
-
-
 void setup(void) {
   
   /**
@@ -192,8 +187,10 @@ void setup(void) {
 
   digitalWrite(WIFI_ERR_LED, LOW);
 
-  Serial.begin(57600);
-  Serial.setTimeout(50);    //Timeout value in ms -- max is 1000
+  #if defined(ENABLE_LOGGING)
+    Serial.begin(57600);
+    Serial.setTimeout(50);    //Timeout value in ms -- max is 1000
+  #endif
   
   current_state = EVALUATE_SLEEP_BIT;
 
