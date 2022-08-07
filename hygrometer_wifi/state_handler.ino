@@ -383,30 +383,34 @@ void StateEvaluation( void ) {      //TODO: see babybot for example
              * @brief Sending To: command
              * i.e.  --> client.println(F("To: clinton.guenther@gmail.com"));
              */
-             client.println(F("To: clinton.guenther@gmail.com"));
+             client.println(F("To:  clinton.guenther@gmail.com"));
             // memset(buf_temp, 0, TEMP_BUF_SIZE);
             // strcpy(buf_temp, "To: ");
             // strcat(buf_temp, buf_recipient_email_addr);
             // client.println(buf_temp);
             // Serial.print("\t*** DEBUG To: command");
             // Serial.println(buf_temp);
-            if (!eRcv()){
-                #if defined(ENABLE_LOGGING)
-                    Serial.println(F("\t*** Error on command \"To:\"."));
-                #endif
-                FlushSerialRXBuffer( );
-                current_state = WAITING_FOR_DATA;        //TODO do we want this or the sleep state?
-                break;
-            }
+            
+            //TODO I don't think the following block can be in
+            // if (!eRcv()){
+            //     #if defined(ENABLE_LOGGING)
+            //         Serial.println(F("\t*** Error on command \"To:\"."));
+            //     #endif
+            //     FlushSerialRXBuffer( );
+            //     current_state = WAITING_FOR_DATA;        //TODO do we want this or the sleep state?
+            //     break;
+            // }
+            //TODO This is the end of the block
 
             /**
              * @brief Sending From: command
              * i.e. -->  client.println(F("From: clinton.debug@gmail.com"));
              */
-            memset(buf_temp, 0, TEMP_BUF_SIZE);
-            strcpy(buf_temp, "From: ");
-            strcat(buf_temp, buf_sender_email_addr);
-            client.println(buf_temp);
+            client.println(F("From: clinton.debug@gmail.com"));
+            // memset(buf_temp, 0, TEMP_BUF_SIZE);
+            // strcpy(buf_temp, "From: ");
+            // strcat(buf_temp, buf_sender_email_addr);
+            // client.println(buf_temp);
 
             /**
              * @brief Send the subject
