@@ -19,4 +19,6 @@ It is necessary to install the  **ArduinoJson**  library.  To do so, click on *T
 The digital hygrometer utilizes a bare ESP8266 WiFi SOM.  For proper compilation, the target board shall be  *Generic ESP8266 Module*.  
 
 ### VERSIONS ###
-* V0.0.1 -- New email method is working, but this version desires a good amount of cleanup.  This version is not ready to be deployed.  
+* V0.0.1 -- New email method is working, but this version desires a good amount of cleanup.  This version is not ready to be deployed.
+
+* V0.0.2 -- The email sending routine is working really well.  However, it won't be tagged as a release until it is tested in the system.  All network/account parameters are passed in via JSON.

@@ -78,14 +78,14 @@ WiFiClient client;
 char buf_wifi_password[32];
 char buf_wifi_ssid[32];
 
-char buf_hyg_name[32];                // Email address hygrometer used to send emails
+char buf_hyg_name[32];                  // Email address hygrometer used to send emails
 char buf_hyg_smtp2go_account[64];       // Email address hygrometer used to send emails
 char buf_hyg_smtp2go_password[64];      // Account password for aforementioned email address 
-char buf_recipient_email_addr[64];    // Email address of recipient
-char buf_sender_email_addr[64];       // Email address of sender
+char buf_recipient_email_addr[64];      // Email address of recipient
+char buf_sender_email_addr[64];         // Email address of sender
 
-#define TEMP_BUF_SIZE        64
-char buf_temp[TEMP_BUF_SIZE];             // Temporary buffer that can be used for building strings
+#define TEMP_BUF_SIZE             64    // Size of the temporary buffer
+char buf_temp[TEMP_BUF_SIZE];           // Temporary buffer that can be used for building strings
 
 float humidity_1        = 0;
 float humidity_2        = 0;
