@@ -118,6 +118,9 @@ void SerialReadtoArray ( void ) {
             timeout++;
             delay(1);
             if(timeout == SER_TIMEOUT_MS) {
+                #if defined(ENABLE_LOGGING)
+                    Serial.println("\t Serial receive timeout!");      
+                #endif
                 break;
             }
 
@@ -127,7 +130,7 @@ void SerialReadtoArray ( void ) {
 
     if(timeout == SER_TIMEOUT_MS) {
         #if defined(ENABLE_LOGGING)
-            Serial.println("\t Serial receive timeout!");      //TODO may want to remove
+            Serial.println("\t Serial receive timeout!");      
         #endif
     }
     

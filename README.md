@@ -22,3 +22,5 @@ The digital hygrometer utilizes a bare ESP8266 WiFi SOM.  For proper compilation
 * V0.0.1 -- New email method is working, but this version desires a good amount of cleanup.  This version is not ready to be deployed.
 
 * V0.0.2 -- The email sending routine is working really well.  However, it won't be tagged as a release until it is tested in the system.  All network/account parameters are passed in via JSON.
+
+* v1.0.0 -- Working really well, even with the hygrometer naming key.  The baud rate has been reduced to 9600 to support necessary algorithm changes at the MCU.  

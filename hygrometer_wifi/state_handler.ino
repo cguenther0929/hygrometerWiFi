@@ -75,7 +75,6 @@ void StateEvaluation( void ) {
             #endif
 
             json_err = deserializeJson(json_doc,data_input_string);
-            Serial.println("\t***DEBUG Here 1.\n");     //TODO need to remove this line!!
             
             if(json_err) {
 
@@ -247,7 +246,7 @@ void StateEvaluation( void ) {
          */
         case NETWORK_CONNECTION:
             
-            WiFi.forceSleepWake();            /** TODO: might want to enable this or implement something similar */
+            WiFi.forceSleepWake();
             delay(1);                       // There are claims that a non-zero delay is required after calling the wake function
 
             if(!WiFiConnect(buf_wifi_ssid, buf_wifi_password)) {
@@ -290,7 +289,7 @@ void StateEvaluation( void ) {
                     Serial.println(F("\t*** Error connecting to the client"));
                 #endif
                 FlushSerialRXBuffer( );
-                current_state = WAITING_FOR_DATA;        //TODO do we want this or the sleep state?
+                current_state = DEEP_SLEEP;        
                 break;
             }
 
@@ -302,13 +301,12 @@ void StateEvaluation( void ) {
                 Serial.println(F("Sending EHLO"));
             #endif
             client.println("EHLO www.example.com");
-            // if (!eRcv()) return;     //TODO need to remove this line
             if (!eRcv()){
                 #if defined(ENABLE_LOGGING)
                     Serial.println(F("\t*** Error sending EHLO command."));
                 #endif
                 FlushSerialRXBuffer( );
-                current_state = WAITING_FOR_DATA;        //TODO do we want this or the sleep state?
+                current_state = DEEP_SLEEP;
                 break;
             }
             
@@ -326,7 +324,7 @@ void StateEvaluation( void ) {
                     Serial.println(F("\t*** Error sending AUTH LOGIN command."));
                 #endif
                 FlushSerialRXBuffer( );
-                current_state = WAITING_FOR_DATA;        //TODO do we want this or the sleep state?
+                current_state = DEEP_SLEEP;
                 break;
             }
 
@@ -346,7 +344,7 @@ void StateEvaluation( void ) {
                     Serial.println(buf_hyg_smtp2go_account);
                 #endif
                 FlushSerialRXBuffer( );
-                current_state = WAITING_FOR_DATA;        //TODO do we want this or the sleep state?
+                current_state = DEEP_SLEEP;
                 break;
             }
 
@@ -368,7 +366,7 @@ void StateEvaluation( void ) {
                     Serial.println(F("\t*** Error sending SMTP2GO password"));
                 #endif
                 FlushSerialRXBuffer( );
-                current_state = WAITING_FOR_DATA;        //TODO do we want this or the sleep state?
+                current_state = DEEP_SLEEP;
                 break;
             }
             
@@ -388,7 +386,7 @@ void StateEvaluation( void ) {
                     Serial.println(buf_temp);
                 #endif
                 FlushSerialRXBuffer( );
-                current_state = WAITING_FOR_DATA;        //TODO do we want this or the sleep state?
+                current_state = DEEP_SLEEP;
                 break;
             }
             
@@ -415,7 +413,7 @@ void StateEvaluation( void ) {
                     Serial.println(buf_temp);
                 #endif
                 FlushSerialRXBuffer( );
-                current_state = WAITING_FOR_DATA;        //TODO do we want this or the sleep state?
+                current_state = DEEP_SLEEP;
                 break;
             }
             
@@ -433,7 +431,7 @@ void StateEvaluation( void ) {
                     Serial.println(F("\t*** Error on command \"DATA\"."));
                 #endif
                 FlushSerialRXBuffer( );
-                current_state = WAITING_FOR_DATA;        //TODO do we want this or the sleep state?
+                current_state = DEEP_SLEEP;
                 break;
             }
 
@@ -474,7 +472,7 @@ void StateEvaluation( void ) {
                     Serial.println(F("\t*** Error sending DOT to complete transaction"));
                 #endif
                 FlushSerialRXBuffer( );
-                current_state = WAITING_FOR_DATA;        //TODO do we want this or the sleep state?
+                current_state = DEEP_SLEEP;
                 break;
             }
 
@@ -493,7 +491,7 @@ void StateEvaluation( void ) {
                     Serial.println(F("\t*** Error sending \"QUIT\"."));
                 #endif
                 FlushSerialRXBuffer( );
-                current_state = WAITING_FOR_DATA;        //TODO do we want this or the sleep state?
+                current_state = DEEP_SLEEP;
                 break;
             }
             
@@ -507,7 +505,7 @@ void StateEvaluation( void ) {
             Serial.println(F("disconnected"));
             #endif
 
-            current_state = DEEP_SLEEP;         //TODO this is the line we want
+            current_state = DEEP_SLEEP;
         }
         break;
 

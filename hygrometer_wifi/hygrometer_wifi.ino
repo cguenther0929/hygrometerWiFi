@@ -4,10 +4,10 @@
 */
 
 #include <ESP8266WiFi.h>
-// #include <WiFiClientSecure.h>   //TODO does adding this in break anything?
 #include <ArduinoJson.h>
 #include <pins_arduino.h>
 #include <Ticker.h>
+// #include <WiFiClientSecure.h>
 // #include "EMailSender.h"
 
 /**
@@ -15,7 +15,7 @@
  * if you wish to have logging 
  * data printed to the screen
  */
-#define ENABLE_LOGGING      
+#define ENABLE_LOGGING
 
 /**
  * JSON and input
@@ -63,7 +63,7 @@ WiFiClient client;
  * Serial port 
  * parameters
  */
-#define SER_TIMEOUT_MS            100
+#define SER_TIMEOUT_MS            500
 
 /**
  * Error LED
@@ -188,7 +188,7 @@ void setup(void) {
   digitalWrite(WIFI_ERR_LED, LOW);
 
   #if defined(ENABLE_LOGGING)
-    Serial.begin(57600);
+    Serial.begin(9600);
     Serial.setTimeout(50);    //Timeout value in ms -- max is 1000
   #endif
   
