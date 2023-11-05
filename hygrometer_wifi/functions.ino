@@ -11,12 +11,13 @@ bool WiFiConnect( const char * ssid, const char * password ) {
      * for WiFi if logging
      * is enabled
      */
-    #if defined(ENABLE_LOGGING)
+    if(ENABLE_LOGGING) {
+
         Serial.println("");
         Serial.print("\tMy MAC address is: "); Serial.println(WiFi.macAddress());
         Serial.print("\tConnecting to SSID: "); Serial.println(ssid);
         Serial.print("\tSSID password: "); Serial.println(password);
-    #endif
+    }
 
     
     // Wait for connection
@@ -35,11 +36,11 @@ bool WiFiConnect( const char * ssid, const char * password ) {
     }
     #endif
 
-    #if defined(ENABLE_LOGGING)
+    if(ENABLE_LOGGING) {
         Serial.println("\tWiFi connected!");
         Serial.print("\tMy local IP: ");
         Serial.println(WiFi.localIP());
-    #endif
+    }
 
     return true;
 
@@ -106,9 +107,9 @@ void SerialReadtoArray ( void ) {
             i++;
             
             if(i > MAX_RX_BUF_INDEX) {
-                #if defined(ENABLE_LOGGING)
+                if(ENABLE_LOGGING){
                     Serial.println("\tSerial overflow.");
-                #endif
+                }
                 
                 break;
             }
@@ -129,9 +130,9 @@ void SerialReadtoArray ( void ) {
     }
 
     if(timeout == SER_TIMEOUT_MS) {
-        #if defined(ENABLE_LOGGING)
+        if(ENABLE_LOGGING){
             Serial.println("\t Serial receive timeout!");      
-        #endif
+        }
     }
     
     FlushSerialRXBuffer();

@@ -15,7 +15,11 @@
  * if you wish to have logging 
  * data printed to the screen
  */
-#define ENABLE_LOGGING
+// #define ENABLE_LOGGING 1
+#define ENABLE_LOGGING 0
+
+
+#define SERIAL_STRING "V1.2.0"
 
 /**
  * JSON and input
@@ -199,9 +203,15 @@ void setup(void) {
   timer1_enable(TIM_DIV16, TIM_EDGE, TIM_SINGLE);
   timer1_write(tmr1_write_val);        //.05s 
 
-  #if defined(ENABLE_LOGGING)
+  // #if defined(ENABLE_LOGGING)
+  //   delay(2000);
+  //   Serial.println("Module just rebooted.");
+  //   Serial.print("SW Version: "); Serial.println(SERIAL_STRING);
+  // #endif
+  if(ENABLE_LOGGING) {
     delay(2000);
     Serial.println("Module just rebooted.");
-  #endif
+    Serial.print("SW Version: "); Serial.println(SERIAL_STRING);
+  }
 
 }
