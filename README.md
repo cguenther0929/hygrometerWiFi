@@ -25,4 +25,6 @@ The digital hygrometer utilizes a bare ESP8266 WiFi SOM.  For proper compilation
 
 * v1.0.0 -- Working really well, even with the hygrometer naming key.  The baud rate has been reduced to 9600 to support necessary algorithm changes at the MCU.  
 
-* v1.0.0 -- A SW version string was added, but it is not currently used.  The previous version (1.0.0) will certainly work in place of this version.
+* v1.2.0 -- A SW version string was added, but it is not currently used.  The previous version (1.0.0) will certainly work in place of this version.
+
+* v1.2.1 -- WiFi transmit power has been hardcoded to the minimum value by calling function WiFi.setOutputPower(0).

@@ -40,7 +40,11 @@ bool WiFiConnect( const char * ssid, const char * password ) {
         Serial.println("\tWiFi connected!");
         Serial.print("\tMy local IP: ");
         Serial.println(WiFi.localIP());
+        Serial.print("\tSeeting WiFi Transmit Power");
     }
+    WiFi.setOutputPower(0);
+
+
 
     return true;
 

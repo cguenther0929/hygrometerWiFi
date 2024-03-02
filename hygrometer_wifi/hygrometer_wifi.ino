@@ -1,6 +1,8 @@
 /*
  * This is the main source file for the ESP8266 WiFi SOM
  * 
+ * TODO: we need to me more consistant with #if defined (ENABLE_LOGGING)
+ * TODO: vs. if(ENABLE_LOGGING)
 */
 
 #include <ESP8266WiFi.h>
@@ -19,7 +21,7 @@
 #define ENABLE_LOGGING 0
 
 
-#define SERIAL_STRING "V1.2.0"
+#define VERSION_STRING "V1.2.1"
 
 /**
  * JSON and input
@@ -203,15 +205,10 @@ void setup(void) {
   timer1_enable(TIM_DIV16, TIM_EDGE, TIM_SINGLE);
   timer1_write(tmr1_write_val);        //.05s 
 
-  // #if defined(ENABLE_LOGGING)
-  //   delay(2000);
-  //   Serial.println("Module just rebooted.");
-  //   Serial.print("SW Version: "); Serial.println(SERIAL_STRING);
-  // #endif
   if(ENABLE_LOGGING) {
     delay(2000);
     Serial.println("Module just rebooted.");
-    Serial.print("SW Version: "); Serial.println(SERIAL_STRING);
+    Serial.print("SW Version: "); Serial.println(VERSION_STRING);
   }
 
 }
